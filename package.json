@@ -1,0 +1,37 @@
+{
+  "name": "bnb-regime-detection-skill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A CoinMarketCap-powered regime-detection Strategy Skill for the BNB Hack: AI Trading Agent Edition (Track 2)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --forceExit --detectOpenHandles",
+    "test:watch": "jest --watch",
+    "backtest": "ts-node skills/regime_detection/backtest/run.ts",
+    "lint": "eslint skills/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/test/**/*.test.ts"],
+    "collectCoverageFrom": ["skills/**/src/**/*.ts"]
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
