@@ -123,5 +123,5 @@ skills/regime_detection/
 │   └── run.ts                # CLI: yarn backtest
 ├── manifest/
 │   └── SKILL.md              # Agent-facing Skill definition (CMC Hub format)
-└── test/                     # 63 passing tests across all modules
+└── test/                     # 76 passing tests across all modules
 ```

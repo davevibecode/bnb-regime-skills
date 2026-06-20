@@ -5,7 +5,7 @@
 **BNB Hack: AI Trading Agent Edition — Track 2 (Strategy Skills)**
 Powered by the CoinMarketCap AI Agent Hub
 
-[![Tests](https://img.shields.io/badge/tests-63%20passing-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 
@@ -23,6 +23,8 @@ This is the meta-strategy layer the hackathon brief names directly: *"A regime-d
 
 **Read the agent-facing Skill definition:** [`skills/regime_detection/manifest/SKILL.md`](skills/regime_detection/manifest/SKILL.md) — matches the official CoinMarketCap Skill format, ready to drop into an agent's skills directory.
 
+**See it actually run:** [`docs/DEMO_TRANSCRIPT.md`](docs/DEMO_TRANSCRIPT.md) — real, unedited output from the full test suite and a live backtest CLI run.
+
 ---
 
 ## Quick Start
@@ -32,7 +34,7 @@ yarn install
 cp .env.example .env
 # Add your CMC_API_KEY from https://pro.coinmarketcap.com/login
 
-# Run the full test suite (63 tests, no API key needed)
+# Run the full test suite (76 tests, no API key needed)
 yarn test
 
 # Run a backtest on synthetic data (no API key needed)
@@ -74,7 +76,7 @@ if (result.success) {
 
 Every component in this repo has been run and checked before being called done:
 
-- **63/63 tests passing**, zero TypeScript errors
+- **76/76 tests passing**, zero TypeScript errors
 - **No-look-ahead-bias verified by automated test** — the backtest engine's classification and equity at bar *i* are confirmed bit-for-bit identical whether or not future bars exist in the series
 - **Two real classifier bugs were caught and fixed during development**, not left in:
   - An open-interest threshold that never fired for realistic day-over-day OI moves (documented in `STRATEGY_SPEC.md` §5 and in code comments in `classifier.ts`)
@@ -91,7 +93,7 @@ skills/regime_detection/
 ├── strategies/      # Momentum + mean-reversion sub-strategies
 ├── backtest/         # Walk-forward simulator, metrics, CLI runner
 ├── manifest/          # Agent-facing SKILL.md (CMC Hub format)
-└── test/               # 63 tests across all modules
+└── test/               # 76 tests across all modules
 docs/
 └── STRATEGY_SPEC.md    # Full strategy spec — read this for the analysis
 ```
