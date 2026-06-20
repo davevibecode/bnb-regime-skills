@@ -80,7 +80,13 @@ async function main() {
     context = result.context;
     fetchWarnings = result.fetchWarnings;
   } else {
-    const result = generateSyntheticSeries(days, 100, 42);
+    // Derive a seed from the symbol so different symbols produce genuinely
+    // different synthetic series (not the same fixture relabelled) while
+    // staying fully deterministic/reproducible for a given symbol.
+    const seed = symbol
+      .split("")
+      .reduce((acc, ch) => acc * 31 + ch.charCodeAt(0), 7) % 100000;
+    const result = generateSyntheticSeries(days, 100, seed);
     bars = result.bars;
     context = result.context;
   }
