@@ -66,6 +66,11 @@ function scoreFundingRate(avgFundingRate: number): RegimeSignal {
  * Logic: rising OI + rising price = healthy trend (new money entering longs).
  * Rising OI + falling price = healthy downtrend (new money entering shorts).
  * Falling OI = positions closing, regardless of direction — weakening conviction.
+ *
+ * Thresholds are tuned for DAY-OVER-DAY open interest changes, which move
+ * much more slowly than price (1-3% on an active day is meaningful — OI
+ * rarely swings 5%+ in 24h even during a real trend). Using a 5% threshold
+ * here would almost never fire and silently degrade this signal to noise.
  */
 function scoreOpenInterestTrend(
   oiChangePct: number,
@@ -74,15 +79,16 @@ function scoreOpenInterestTrend(
   let score: number;
   let rationale: string;
 
-  const oiRising = oiChangePct > 5;
-  const oiFalling = oiChangePct < -5;
+  const oiRising = oiChangePct > 0.5;
+  const oiFalling = oiChangePct < -0.5;
   const priceRising = priceChangePct > 0;
 
   if (oiRising && priceRising) {
-    score = 0.8;
+    // Scale conviction by how strong the OI build is, not just binary on/off
+    score = clamp(0.5 + oiChangePct / 10, 0.5, 1);
     rationale = `Open interest up ${oiChangePct.toFixed(1)}% alongside rising price — new capital confirming an uptrend.`;
   } else if (oiRising && !priceRising) {
-    score = -0.8;
+    score = clamp(-0.5 - oiChangePct / 10, -1, -0.5);
     rationale = `Open interest up ${oiChangePct.toFixed(1)}% alongside falling price — new capital confirming a downtrend.`;
   } else if (oiFalling) {
     score = 0;
@@ -100,7 +106,11 @@ function scoreOpenInterestTrend(
  *
  * Logic: used as a contrarian-leaning sentiment signal at extremes
  * (Extreme Fear = oversold bounce risk; Extreme Greed = overbought pullback risk),
- * but trend-confirming in the middle range.
+ * but trend-confirming in the middle range. The middle-range score blends the
+ * absolute level (distance from neutral=50) with the day-over-day delta —
+ * using delta alone would read ~0 during a sustained Greed/Fear period where
+ * the index has already moved and is now drifting slowly, even though the
+ * elevated level itself is still a real confirming signal.
  */
 function scoreFearGreed(value: number, previousValue: number): RegimeSignal {
   let score: number;
@@ -113,10 +123,14 @@ function scoreFearGreed(value: number, previousValue: number): RegimeSignal {
     score = -0.3; // contrarian bearish lean at extreme greed
     rationale = `Fear & Greed at ${value} (Extreme Greed) — contrarian signal favouring mean-reversion short bias / caution.`;
   } else {
-    // Middle range — trend-confirming based on direction of change
+    // Middle range — blend absolute level (distance from neutral=50) with
+    // the day-over-day delta. Level captures "sentiment is currently elevated/
+    // depressed"; delta captures "sentiment is actively improving/worsening".
+    const levelScore = clamp((value - 50) / 30, -1, 1);
     const delta = value - previousValue;
-    score = clamp(delta / 20, -0.5, 0.5);
-    rationale = `Fear & Greed at ${value}, moved ${delta >= 0 ? "+" : ""}${delta} — ${delta > 0 ? "improving sentiment" : delta < 0 ? "deteriorating sentiment" : "stable sentiment"}.`;
+    const deltaScore = clamp(delta / 10, -1, 1);
+    score = clamp(levelScore * 0.6 + deltaScore * 0.4, -1, 1);
+    rationale = `Fear & Greed at ${value} (${delta >= 0 ? "+" : ""}${delta} vs prior) — ${score > 0.1 ? "confirms bullish sentiment" : score < -0.1 ? "confirms bearish sentiment" : "neutral sentiment"}.`;
   }
 
   return { name: "fear_greed", score, weight: WEIGHTS.fearGreed, rationale };
